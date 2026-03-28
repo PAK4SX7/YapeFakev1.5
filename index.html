@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="orientation" content="portrait">
+  <title>Yape Fake App</title>
+  
+  <title>Yape App</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#790699">
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+<style>
+    /* ========== ESTILOS GLOBALES ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html, body {
+      overflow-x: hidden;
+      overflow-y: hidden;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .screen.active {
+      display: flex;
+      opacity: 1;
+      z-index: 20;
+      pointer-events: all;
+    }
+
+    .screen.visible {
+      display: flex;
+    }
+
+    /* ========== SPLASH SCREEN ========== */
+    #splash-screen {
+      background: #000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #splash-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0;
+      transform: scale(0.3) translateY(50px);
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    #splash-screen.active img {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    /* ========== MAIN MENU ========== */
+    #main-screen {
+      background: #790699;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      background: #790699;
+      height: 100vh;
+      height: 100dvh;
+      position: relative;
+      padding-bottom: 0;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #790699;
+      flex-shrink: 0;
+    }
+
+    /* 🔴 BOTONES SUPERIORES MÁS GRANDES */
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:active { background: rgba(255, 255, 255, 0.25); }
+    .icon-btn svg { 
+      width: 20px;
+      height: 20px;
+      fill: white; 
+      opacity: 0.95; 
+    }
+
+    /* Greeting */
+    .greeting-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
+      transition: background 0.2s;
+      min-width: 0;
+    }
+    .greeting-container:active { background: rgba(255, 255, 255, 0.1); }
+    .greeting-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      flex-shrink: 0;
+    }
+    .greeting-icon svg { 
+      width: 24px;
+      height: 24px;
+      fill: white; 
+      opacity: 0.9; 
+    }
+    .greeting-text {
+      color: white; 
+      font-size: 22px;
+      font-weight: 700;
+      opacity: 0.95; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+    }
+
+    /* Grid */
+    .grid-section {
+      padding: 10px 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px 6px;
+      flex-shrink: 0;
+    }
+    .grid-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 5px; cursor: pointer; position: relative;
+    }
+    .tile {
+      width: 54px; height: 54px;
+      background: white; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative; overflow: hidden; padding: 8px; flex-shrink: 0;
+    }
+    .tile img { 
+      width: 36px; height: 36px;
+      object-fit: contain; 
+    }
+    .tile-large img { 
+      width: 50px; height: 50px;
+    }
+    .label {
+      color: white; 
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.2; font-weight: 600; opacity: 0.95;
+      word-break: break-word; max-width: 100%;
+    }
+    .badge-ica {
+      position: absolute; top: -4px; right: -2px;
+      background: #FFB300; color: #3E2723;
+      font-size: 7px; font-weight: 700;
+      padding: 1px 3px; border-radius: 3px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2;
+    }
+
+    /* ========== CAROUSEL ========== */
+    .carousel-section {
+      margin: 18px 10px 8px 8px;
+      background: transparent;
+      border-radius: 12px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .carousel-container {
+      position: relative;
+      overflow: visible;
+      border-radius: 12px;
+      padding: 0 4px;
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.3s ease;
+      padding-left: 4px;
+    }
+    .carousel-slide {
+      min-width: calc(100% - 30px);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background: transparent;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+    /* 🔴 ANUNCIOS MÁS GRANDES */
+    .carousel-slide img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 140px;
+      object-fit: contain;
+      border-radius: 10px;
+      display: block;
+    }
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 6px;
+    }
+    .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: rgba(255,255,255,0.4); transition: all 0.3s; cursor: pointer;
+    }
+    .dot.active { width: 16px; border-radius: 3px; background: white; }
+
+    /* Bottom Panel */
+    .bottom-panel {
+      background: #F5F5F7; 
+      margin-top: auto;
+      border-top-left-radius: 32px;
+      border-top-right-radius: 32px;
+      padding: 24px 12px calc(16px + env(safe-area-inset-bottom));
+      min-height: 220px;
+      width: 100%; 
+      max-width: 430px;
+      flex-shrink: 0;
+    }
+    .balance-card, .transactions-card {
+      background: white; border-radius: 12px;
+      padding: 16px; margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; width: 100%;
+    }
+    .balance-left, .transactions-left { display: flex; align-items: center; gap: 12px; }
+    .balance-icon { width: 26px; height: 26px; fill: #790699; }
+    .balance-label, .transactions-label {
+      font-size: 16px; color: #641974; font-weight: 500;
+    }
+    .balance-value { font-size: 18px; font-weight: 700; color: #1E192D; }
+    .transactions-icon { width: 24px; height: 24px; object-fit: contain; }
+    .chevron { width: 22px; height: 22px; fill: #9E9E9E; }
+
+    /* Action Buttons */
+    .action-buttons { display: flex; gap: 14px; margin-top: 10px; }
+    .btn {
+      flex: 1; height: 60px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; font-size: 18px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; border: none; outline: none;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-qr { background: white; color: #18B7A0; border: 2px solid #18B7A0; }
+    .btn-qr svg { width: 24px; height: 24px; fill: #18B7A0; }
+    .btn-yapear { background: #18B7A0; color: white; }
+    .btn-yapear svg { width: 24px; height: 24px; fill: white; }
+
+    /* Modals */
+    .modal-overlay, .modal-overlay-saldo {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: none;
+      align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    .modal-overlay.active, .modal-overlay-saldo.active { display: flex; }
+    .modal-content, .modal-content-saldo {
+      background: white; border-radius: 20px; padding: 24px;
+      width: 100%; max-width: 350px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .modal-title, .modal-title-saldo {
+      font-size: 18px; font-weight: 700;
+      color: #1a1a1a; margin-bottom: 20px; text-align: center;
+    }
+    .input-wrapper, .input-wrapper-saldo { margin-bottom: 20px; }
+    .name-input {
+      width: 100%; padding: 16px; font-size: 16px; font-weight: 500;
+      border: 2px solid #E0E0E0; border-radius: 12px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .name-input:focus { border-color: #790699; }
+    .currency-symbol-modal {
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%); font-size: 20px;
+      font-weight: 700; color: #790699;
+    }
+    .amount-input-modal {
+      width: 100%; padding: 16px 16px 16px 40px; font-size: 24px;
+      font-weight: 700; border: 2px solid #E0E0E0; border-radius: 12px;
+      outline: none; text-align: right; transition: border-color 0.2s; position: relative;
+    }
+    .amount-input-modal:focus { border-color: #790699; }
+    .modal-buttons, .modal-buttons-saldo { display: flex; gap: 12px; }
+    .modal-btn, .modal-btn-saldo {
+      flex: 1; padding: 14px; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .modal-btn:active, .modal-btn-saldo:active { transform: scale(0.98); }
+    .btn-cancel, .btn-cancel-saldo { background: #F5F5F7; color: #424242; }
+    .btn-save, .btn-save-saldo { background: #790699; color: white; }
+
+    /* ========== MODAL DE CRÉDITOS ========== */
+    .credits-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    .credits-modal-overlay.active { display: flex; }
+    
+    .credits-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .credits-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #790699;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .credits-content {
+      text-align: left;
+      margin-bottom: 24px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #333;
+    }
+    
+    .credits-content strong {
+      color: #790699;
+      font-weight: 600;
+    }
+    
+    .credits-content div {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .credits-content svg {
+      width: 20px;
+      height: 20px;
+      fill: #790699;
+      flex-shrink: 0;
+    }
+    
+    .credits-btn {
+      width: 100%;
+      padding: 14px;
+      background: #790699;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .credits-btn:active { background: #5e0478; }
+
+    /* ========== PAYMENT FORM ========== */
+    #form-screen {
+      background-color: #f0f0f0; flex-direction: column;
+      align-items: center; overflow-y: auto;
+    }
+    .form-container {
+      background-color: #ffffff; width: 100%; max-width: 400px;
+      height: 100vh; max-height: 850px; display: flex;
+      flex-direction: column; position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      overflow-x: hidden !important; overflow-y: auto;
+      touch-action: pan-y;
+    }
+    .form-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 20px; font-weight: bold; font-size: 20px;
+      color: #1a1a1a; flex-shrink: 0; width: 100%;
+    }
+    .form-icon-btn {
+      cursor: pointer; font-size: 24px; display: flex;
+      align-items: center; justify-content: center;
+      width: 30px; height: 30px; color: #790699; font-weight: bold;
+    }
+    .recipient-section {
+      display: flex; justify-content: center; padding: 20px 0;
+      flex-shrink: 0; width: 100%;
+    }
+    .recipient-name {
+      font-size: 22px; color: #555; padding: 5px 10px;
+      border-radius: 5px; outline: none; border: 1px solid transparent;
+      transition: border 0.2s; text-align: center;
+      background: transparent; width: 200px;
+    }
+    .recipient-name:focus { border-bottom: 1px solid #ccc; }
+    .recipient-name::placeholder { color: #999; }
+    .amount-section {
+      flex-grow: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      margin-top: 20px; width: 100%; position: relative; overflow: hidden;
+    }
+    .amount-wrapper {
+      position: relative; width: 100%; display: flex;
+      justify-content: center; align-items: center; height: 100px;
+    }
+    .currency-symbol-form {
+      color: #9b59b6; font-size: 30px; font-weight: 500;
+      position: absolute; left: 50%; transform-origin: left center;
+      transition: transform 0.2s ease; pointer-events: none;
+    }
+    .amount-input-form {
+      color: #790699; font-size: 60px; font-weight: normal;
+      font-family: monospace; line-height: 1; border: none;
+      background: transparent; outline: none; text-align: center;
+      width: 100%; max-width: 280px; display: block; margin: 0 auto;
+      transition: font-size 0.2s ease;
+    }
+    .amount-input-form::placeholder {
+      color: #790699; font-weight: normal;
+      font-family: monospace; opacity: 1;
+    }
+    .error-message {
+      background-color: #f0f0f5; color: #555; padding: 8px 16px;
+      border-radius: 20px; font-size: 14px; margin-top: 20px;
+      display: inline-block; transition: opacity 0.3s; white-space: nowrap;
+    }
+    .error-message.hidden { opacity: 0; pointer-events: none; }
+    .input-section {
+      padding: 20px; text-align: center; margin-bottom: 20px;
+      flex-shrink: 0; width: 100%;
+    }
+    .number-input {
+      border: none; border-bottom: 1px solid #ddd; font-size: 18px;
+      color: #333; text-align: center; width: 100%; max-width: 300px;
+      padding: 10px; outline: none; background: transparent;
+      margin: 0 auto; display: block;
+    }
+    .number-input::placeholder { color: #555; font-weight: 400; }
+    .number-input:focus { border-bottom: 2px solid #00cba9; }
+    .form-footer {
+      padding: 20px; display: flex; gap: 15px;
+      padding-bottom: 30px; flex-shrink: 0; width: 100%;
+    }
+    .form-btn {
+      flex: 1; padding: 15px; border-radius: 8px; font-size: 16px;
+      font-weight: 500; cursor: pointer; text-align: center;
+      border: none; transition: opacity 0.2s;
+    }
+    .form-btn:active { opacity: 0.8; }
+    .btn-secondary { background-color: white; border: 1px solid #ccc; color: #555; }
+    .btn-primary {
+      background-color: #00cba9; color: white; font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0, 203, 169, 0.3);
+    }
+
+    /* ========== RECEIPT SCREEN - PANTALLA COMPLETA ========== */
+    #receipt-screen {
+      background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    .receipt-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .receipt-image-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      /* Animación de entrada del comprobante */
+      animation: receiptAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    .receipt-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    /* 🔵 ANIMACIÓN DE ENTRADA DEL COMPROBANTE */
+    @keyframes receiptAppear {
+      0% {
+        opacity: 0;
+        transform: scale(0.1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    /* 
+    ════════════════════════════════════════════════════════════════
+    🟢 AQUÍ ESTÁN LAS POSICIONES, ALTURA Y TAMAÑO DE LOS TEXTOS
+       PARA MODIFICACIÓN MANUAL - VALORES ENTEROS SIMPLES
+    ════════════════════════════════════════════════════════════════
+    
+    Instrucciones:
+    - left: posición horizontal en píxeles (de izquierda a derecha)
+    - top: posición vertical en píxeles (de arriba hacia abajo)
+    - font-size: tamaño del texto en píxeles
+    - color: color del texto en hexadecimal
+    
+    Ejemplo: 
+    
+    Si quieres mover el texto más a la derecha, aumenta el valor de left
+    
+    Si quieres mover el texto más abajo, aumenta el valor de top
+    
+    Si quieres el texto más grande, aumenta el font-size
+    ════════════════════════════════════════════════════════════════
+    */
+    
+    /* Textos superpuestos en el comprobante */
+    .receipt-text {
+      position: absolute;
+      font-weight: 700;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+      line-height: 1;
+    }
+    
+    /*✅ 👤 NOMBRE DEL RECEPTOR */
+    .receipt-name { 
+      left: 41px;
+      top: 210px;
+      font-size: 24px;
+      color: #3E3854;
+    }
+    
+    /*✅ 💰 MONTO */
+    .receipt-amount { 
+      left: 41px;
+      top: 172px;
+      font-size: 35px;
+      color: #3E3854;
+    }
+    
+    /* ✅📱 TELÉFONO (últimos 3 dígitos) */
+    .receipt-phone { 
+      left: 285px;
+      top: 375px;
+      font-size: 14px;
+      color: #3E3854;
+    }
+    
+    /*✅ 📅 FECHA */
+    .receipt-date { 
+      left: 52px;
+      top: 244px;
+      font-size: 15px;
+      color: #626169;
+    }
+    
+    /*✅ ⏰ HORA */
+    .receipt-time { 
+      left: 177px;
+      top: 244px;
+      font-size: 15px;
+      color: #626169;
+    }
+    
+    /*✅ 🔢 NÚMERO ALEATORIO 1 (derecha) */
+    .receipt-random1 { 
+      left: 277px;
+      top: 293px;
+      font-size: 17px;
+      color: #3E3854;
+    }
+    
+    /*✅ 🔢 NÚMERO ALEATORIO 2 (centro-derecha) */
+    .receipt-random2 { 
+      left: 305px;
+      top: 293px;
+      font-size: 17px;
+      color: #3E3854;
+    }
+    
+    /*✅ 🔢 NÚMERO ALEATORIO 3 (izquierda-derecha) */
+    .receipt-random3 { 
+      left: 335px;
+      top: 293px;
+      font-size: 17px;
+      color: #3E3854;
+    }
+    
+    /* ✅🔐 CÓDIGO DE OPERACIÓN (8 dígitos) */
+    .receipt-operation { 
+      left: 288px;
+      top: 427px;
+      font-size: 14px;
+      color: #3E3854;
+    }
+
+    /* ========== ERROR MODAL ========== */
+    .error-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    .error-modal-overlay.active { display: flex; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .error-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .error-icon {
+      width: 50px;
+      height: 50px;
+      background: #ffebee;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    
+    .error-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: #c62828;
+    }
+    
+    .error-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+    }
+    
+    .error-message {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+    
+    .error-btn {
+      width: 100%;
+      padding: 14px;
+      background: #790699;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .error-btn:active { background: #5e0478; }
+
+    /* Responsive & Safe Areas */
+    @media screen and (orientation: landscape) and (max-height: 500px) {
+      body { transform: rotate(90deg); transform-origin: left top; width: 100vh; height: 100vw; position: fixed; top: 0; left: 100%; }
+    }
+    @media screen and (max-width: 360px) {
+      .grid-section { gap: 6px 5px; padding: 10px 12px; }
+      .tile { width: 56px; height: 56px; }
+      .tile img { width: 36px; height: 36px; }
+      .label { font-size: 11px; }
+      .carousel-section { margin: 8px 12px 8px 4px; }
+      .carousel-slide { min-width: calc(100% - 80px); margin-right: 12px; }
+    }
+    @media screen and (min-height: 850px) {
+      .grid-section { padding: 16px; }
+      .bottom-panel { margin-top: 24px; }
+    }
+    @supports (padding: max(0px)) {
+      .top-bar, .grid-section, .bottom-panel {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+      .carousel-section {
+        margin-left: max(8px, env(safe-area-inset-left));
+        margin-right: max(12px, env(safe-area-inset-right));
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ PANTALLA 1: SPLASH ============ -->
+  <div id="splash-screen" class="screen">
+    <img src="https://i.ibb.co/jkJPpxFY/Yape-iniciando.png" alt="Yape iniciando">
+  </div>
+
+  <!-- ============ PANTALLA 2: MENÚ PRINCIPAL ============ -->
+  <div id="main-screen" class="screen">
+    <div class="app-container">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="greeting-container" onclick="openEditNameModal()">
+          <div class="greeting-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <span class="greeting-text" id="greetingText">Hola, Usuario</span>
+        </div>
+        <div class="icon-btn" onclick="openCreditsModal()">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+      </div>
+
+      <!-- Grid Section -->
+      <div class="grid-section">
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/pr9mvKQf/Icono-recargar-celular.png" alt="Recargar"></div><div class="label">Recargar<br>celular</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/MxtgCzXT/Icono-facil-rapido.png" alt="Servicios"></div><div class="label">Yapear<br>servicios</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/BVgywW7n/Icono-promos.png" alt="Promos"></div><div class="label">Promos</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/fYJWtyp2/Icono-aprobar-compras.png" alt="Compras"></div><div class="label">Aprobar<br>compras</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/RkVhgrmx/Icono-creditos.png" alt="Créditos"></div><div class="label">Créditos</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/KzqtXNd7/Icono-gaming.png" alt="Gaming"></div><div class="label">Gaming</div></div>
+        <div class="grid-item"><div class="tile" style="position:relative;"><span class="badge-ica">Ica</span><img src="https://i.ibb.co/2YK1rZyg/Icono-viajes.png" alt="Viajes"></div><div class="label">Viajar<br>en bus</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/wFgwMCr3/Icono-remesas.png" alt="Remesas"></div><div class="label">Remesas</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/35GKjgq9/Icono-soat.png" alt="SOAT"></div><div class="label">SOAT</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/7dHrqy6k/Icono-enviar-al-extrangero.png" alt="Exterior"></div><div class="label">Enviar al<br>exterior</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/mrgCNPmJ/Icono-elecciones-generales.png" alt="Elecciones"></div><div class="label">Elecciones<br>Generales</div></div>
+        <div class="grid-item"><div class="tile tile-large" style="background:transparent;box-shadow:none;"><img src="https://i.ibb.co/fz9RzVrP/Icono-ver-mas.png" alt="Ver todo"></div><div class="label">Ver todo</div></div>
+      </div>
+
+      <!-- Carousel -->
+      <div class="carousel-section">
+        <div class="carousel-container">
+          <div class="carousel-track" id="carouselTrack">
+            <div class="carousel-slide"><img src="https://i.ibb.co/kgjvQ6c5/Yape-anuncio1.png" alt="Ad 1"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/HLD4VHRK/Yape-anuncio2.png" alt="Ad 2"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/KcMJ3FKv/Yape-anuncio3.png" alt="Ad 3"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/1tbDP3cD/Yape-anuncio4.png" alt="Ad 4"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/rGfM0w4Y/Yape-anuncio5.png" alt="Ad 5"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/LXKWw2bY/Yape-anuncio6.png" alt="Ad 6"></div>
+          </div>
+        </div>
+        <div class="carousel-dots">
+          <div class="dot active" onclick="goToSlide(0)"></div>
+          <div class="dot" onclick="goToSlide(1)"></div>
+          <div class="dot" onclick="goToSlide(2)"></div>
+          <div class="dot" onclick="goToSlide(3)"></div>
+          <div class="dot" onclick="goToSlide(4)"></div>
+          <div class="dot" onclick="goToSlide(5)"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Panel -->
+      <div class="bottom-panel">
+        <div class="balance-card">
+          <div class="balance-left" onclick="toggleBalanceVisibility()">
+            <svg class="balance-icon" viewBox="0 0 24 24" id="eyeIcon"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
+            <span class="balance-label" id="balanceLabel">Mostrar saldo</span>
+          </div>
+          <div class="balance-value" id="balanceValue" onclick="openEditSaldoModal(event)"></div>
+        </div>
+        <div class="transactions-card">
+          <div class="transactions-left">
+            <img class="transactions-icon" src="https://i.ibb.co/bjdR5CNH/Icono-ver-movimientos.png" alt="Movimientos">
+            <span class="transactions-label">Mostrar movimientos</span>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-qr"><svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg> Escanear QR</button>
+          <button class="btn btn-yapear" id="btnYapearMain"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Yapear</button>
+        </div>
+      </div>
+
+      <!-- Modals -->
+      <div class="modal-overlay" id="editNameModal">
+        <div class="modal-content">
+          <div class="modal-title">Editar nombre</div>
+          <div class="input-wrapper"><input type="text" class="name-input" id="nameInput" placeholder="Ingresa tu nombre" maxlength="30"></div>
+          <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" onclick="closeEditNameModal()">Cancelar</button>
+            <button class="modal-btn btn-save" onclick="saveName()">Guardar</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-overlay-saldo" id="editSaldoModal">
+        <div class="modal-content-saldo">
+          <div class="modal-title-saldo">Editar saldo</div>
+          <div class="input-wrapper-saldo">
+            <span class="currency-symbol-modal"> </span>
+            <input type="text" class="amount-input-modal" id="amountInputModal" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="modal-buttons-saldo">
+            <button class="modal-btn-saldo btn-cancel-saldo" onclick="closeEditSaldoModal()">Cancelar</button>
+            <button class="modal-btn-saldo btn-save-saldo" onclick="saveAmount()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL DE CRÉDITOS ============ -->
+  <div class="credits-modal-overlay" id="creditsModal">
+    <div class="credits-modal">
+      <div class="credits-title">Créditos de la aplicación</div>
+      <div class="credits-content">
+        <div>
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <strong>Creador:</strong> Pak4sx7
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          <strong>Contactame:</strong>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+          <strong>Telegram:</strong> @pak4sx7
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+          <strong>Instagram:</strong> pak4sx7
+        </div>
+      </div>
+      <button class="credits-btn" onclick="closeCreditsModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- ============ PANTALLA 3: FORMULARIO DE YAPEO ============ -->
+  <div id="form-screen" class="screen">
+    <div class="form-container">
+      <div class="form-header">
+        <div class="form-icon-btn" id="btnBackForm">&lt;</div>
+        <div>Yapear a</div>
+        <div class="form-icon-btn" onclick="showScreen('main-screen')">&times;</div>
+      </div>
+      <div class="recipient-section">
+        <input type="text" class="recipient-name" id="recipientName" placeholder="Nombre">
+      </div>
+      <div class="amount-section">
+        <div class="amount-wrapper">
+          <span class="currency-symbol-form" id="currencySymbolForm">S/</span>
+          <input type="text" class="amount-input-form" id="amountInputForm" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="error-message" id="errorMessage">El monto ingresado no es válido</div>
+      </div>
+      <div class="input-section">
+        <input type="tel" class="number-input" id="phoneInput" placeholder="Agregar número" maxlength="3">
+      </div>
+      <div class="form-footer">
+        <button class="form-btn btn-secondary">Otros bancos</button>
+        <button class="form-btn btn-primary" id="btnYapearForm">Yapear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PANTALLA 4: COMPROBANTE PANTALLA COMPLETA ============ -->
+  <div id="receipt-screen" class="screen">
+    <div class="receipt-container">
+      <div class="receipt-image-wrapper">
+        <img src="https://i.ibb.co/MyK5kWJc/YAPE-BAUCHER-v3.png" alt="Comprobante Yape" class="receipt-image">
+        
+        <!-- Textos superpuestos -->
+        <span class="receipt-text receipt-name" id="receiptName">Nombre</span>
+        <span class="receipt-text receipt-amount" id="receiptAmount">S/ 0</span>
+        <span class="receipt-text receipt-phone" id="receiptPhone">*** *** 000</span>
+        <span class="receipt-text receipt-date" id="receiptDate">01 Ene. 2026</span>
+        <span class="receipt-text receipt-time" id="receiptTime">12:00 p.m.</span>
+        <span class="receipt-text receipt-random1" id="receiptRandom1">0</span>
+        <span class="receipt-text receipt-random2" id="receiptRandom2">0</span>
+        <span class="receipt-text receipt-random3" id="receiptRandom3">0</span>
+        <span class="receipt-text receipt-operation" id="receiptOperation">00000000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL DE ERROR ============ -->
+  <div class="error-modal-overlay" id="errorModal">
+    <div class="error-modal">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <div class="error-title">⚠️ Campos incompletos</div>
+      <div class="error-message" id="errorMessageText">Debes llenar todos los campos para continuar.</div>
+      <button class="error-btn" onclick="closeErrorModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== VARIABLES GLOBALES ==========
+    let currentSlide = 0, totalSlides = 6, balanceHidden = true, currentBalance = '0', currentName = 'Usuario', carouselInterval;
+
+    // ========== PERSISTENCIA CON LOCALSTORAGE ==========
+    const STORAGE_KEY = 'yape_fake_user_data';
+    
+    function loadUserData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.name) currentName = data.name;
+          if (data.balance !== undefined) currentBalance = data.balance;
+          balanceHidden = true;
+        }
+      } catch (e) { console.log('Error loading ', e); }
+    }
+    
+    function saveUserData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          name: currentName,
+          balance: currentBalance,
+          balanceHidden: balanceHidden
+        }));
+      } catch (e) { console.log('Error saving ', e); }
+    }
+
+    // ========== NAVEGACIÓN ENTRE PANTALLAS ==========
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active', 'visible');
+        setTimeout(() => { if (!s.classList.contains('active')) s.style.display = 'none'; }, 300);
+      });
+      const target = document.getElementById(screenId);
+      target.style.display = 'flex';
+      setTimeout(() => target.classList.add('active', 'visible'), 10);
+      
+      if (screenId === 'main-screen') {
+        updateBalanceDisplay();
+        updateGreetingDisplay();
+        startCarousel();
+      }
+    }
+
+    // ========== SPLASH SCREEN ==========
+    window.addEventListener('load', () => {
+      loadUserData();
+      const splash = document.getElementById('splash-screen');
+      splash.classList.add('visible');
+      setTimeout(() => { splash.classList.add('active'); }, 50);
+      setTimeout(() => {
+        splash.style.transition = 'opacity 0.4s ease-out';
+        splash.style.opacity = '0';
+        setTimeout(() => {
+          splash.classList.remove('active', 'visible');
+          splash.style.opacity = '1';
+          splash.style.transition = '';
+          showScreen('main-screen');
+        }, 400);
+      }, 3000);
+    });
+
+    // ========== MENÚ PRINCIPAL - FUNCIONES ==========
+    function updateGreetingDisplay() {
+      document.getElementById('greetingText').textContent = `Hola, ${currentName}`;
+    }
+
+    function openEditNameModal() {
+      const modal = document.getElementById('editNameModal');
+      const input = document.getElementById('nameInput');
+      input.value = currentName;
+      modal.classList.add('active');
+      input.focus(); input.select();
+    }
+    function closeEditNameModal() { document.getElementById('editNameModal').classList.remove('active'); }
+    function saveName() {
+      const newName = document.getElementById('nameInput').value.trim();
+      if (newName) { currentName = newName; updateGreetingDisplay(); saveUserData(); }
+      closeEditNameModal();
+    }
+
+    function updateBalanceDisplay() {
+      const label = document.getElementById('balanceLabel');
+      const icon = document.getElementById('eyeIcon');
+      const value = document.getElementById('balanceValue');
+      if (balanceHidden) {
+        label.textContent = 'Mostrar saldo';
+        icon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+        value.textContent = '';
+      } else {
+        label.textContent = 'Ocultar saldo';
+        icon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+        value.textContent = 'S/ ' + formatNumber(currentBalance);
+      }
+    }
+
+    function toggleBalanceVisibility() { balanceHidden = !balanceHidden; updateBalanceDisplay(); saveUserData(); }
+
+    function openEditSaldoModal(e) {
+      e.stopPropagation();
+      if (balanceHidden) toggleBalanceVisibility();
+      const modal = document.getElementById('editSaldoModal');
+      const input = document.getElementById('amountInputModal');
+      input.value = currentBalance;
+      modal.classList.add('active');
+      input.focus(); input.select();
+    }
+    function closeEditSaldoModal() { document.getElementById('editSaldoModal').classList.remove('active'); }
+    function formatNumber(num) {
+      num = num.replace(/[^0-9.]/g, '');
+      if (!num) return '0.00';
+      let number = parseFloat(num);
+      if (isNaN(number)) return '0.00';
+      return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function saveAmount() {
+      currentBalance = document.getElementById('amountInputModal').value;
+      if (!balanceHidden) updateBalanceDisplay();
+      saveUserData();
+      closeEditSaldoModal();
+    }
+    document.getElementById('amountInputModal').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/[^0-9.]/g, ''), p = v.split('.');
+      if (p.length > 2) v = p[0] + '.' + p.slice(1).join('');
+      e.target.value = v;
+    });
+    document.getElementById('editNameModal').addEventListener('click', e => { if (e.target === this) closeEditNameModal(); });
+    document.getElementById('editSaldoModal').addEventListener('click', e => { if (e.target === this) closeEditSaldoModal(); });
+
+    // Carrusel
+    function goToSlide(i) {
+      currentSlide = i;
+      const track = document.getElementById('carouselTrack');
+      document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+      const slide = document.querySelector('.carousel-slide'), gap = 6;
+      track.style.transform = `translateX(-${i * (slide.offsetWidth + gap)}px)`;
+      resetCarouselTimer();
+    }
+    function startCarousel() {
+      clearInterval(carouselInterval);
+      carouselInterval = setInterval(() => { currentSlide = (currentSlide + 1) % totalSlides; goToSlide(currentSlide); }, 5000);
+    }
+    function resetCarouselTimer() { clearInterval(carouselInterval); startCarousel(); }
+
+    // Swipe en carrusel
+    let tSX = 0, tEX = 0;
+    document.querySelector('.carousel-container').addEventListener('touchstart', e => { tSX = e.changedTouches[0].screenX; }, {passive:true});
+    document.querySelector('.carousel-container').addEventListener('touchend', e => {
+      tEX = e.changedTouches[0].screenX;
+      if (tEX < tSX - 50) { currentSlide = (currentSlide + 1) % totalSlides; goToSlide(currentSlide); }
+      if (tEX > tSX + 50) { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; goToSlide(currentSlide); }
+    }, {passive:true});
+
+    // ========== MODAL DE CRÉDITOS ==========
+    function openCreditsModal() {
+      document.getElementById('creditsModal').classList.add('active');
+    }
+    
+    function closeCreditsModal() {
+      document.getElementById('creditsModal').classList.remove('active');
+    }
+    
+    // Cerrar modal al hacer click fuera
+    document.getElementById('creditsModal').addEventListener('click', function(e) {
+      if (e.target === this) closeCreditsModal();
+    });
+
+    // ========== FORMULARIO DE YAPEO ==========
+    const amountInputForm = document.getElementById('amountInputForm');
+    const currencySymbolForm = document.getElementById('currencySymbolForm');
+    const errorMessage = document.getElementById('errorMessage');
+
+    const soloPunto_1 = { posX: -220, posY: 5, fontSize: 30, scale: 1 };
+    const soloPunto_2 = { posX: -280, posY: 5, fontSize: 30, scale: 1 };
+    const soloPunto_3 = { posX: -290, posY: 5, fontSize: 30, scale: 0.9 };
+    const conDecimal_1_1 = { posX: -270, posY: 5, fontSize: 30, scale: 1 };
+    const conDecimal_1_2 = { posX: -300, posY: 5, fontSize: 30, scale: 1 };
+    const conDecimal_2_1 = { posX: -300, posY: 5, fontSize: 30, scale: 1 };
+    const conDecimal_2_2 = { posX: -328, posY: 5, fontSize: 30, scale: 1 };
+    const conDecimal_3_1 = { posX: -328, posY: 5, fontSize: 30, scale: 0.9 };
+    const conDecimal_3_2 = { posX: -333, posY: 5, fontSize: 30, scale: 0.9 };
+    const symbolConfigEnteros = {
+      '0': { posX: -160, posY: 5, fontSize: 30, scale: 1 }, '1': { posX: -160, posY: 5, fontSize: 30, scale: 1 },
+      '2': { posX: -220, posY: 5, fontSize: 30, scale: 1 }, '3': { posX: -240, posY: 5, fontSize: 30, scale: 0.9 },
+      '4': { posX: -260, posY: 5, fontSize: 30, scale: 0.8 }, '5': { posX: -280, posY: 5, fontSize: 30, scale: 0.8 },
+      '6': { posX: -300, posY: 5, fontSize: 30, scale: 0.8 }
+    };
+    const soloPuntoConfig = { posX: -160, posY: 5, fontSize: 30, scale: 1 };
+
+    function sanitizeInput(value) {
+      value = value.replace(/[^0-9.]/g, '');
+      const dotCount = (value.match(/\./g) || []).length;
+      if (dotCount > 1) { const p = value.split('.'); value = p[0] + '.' + p.slice(1).join(''); }
+      if (value.startsWith('.')) value = value.substring(1);
+      const parts = value.split('.');
+      if (parts[0].length > 3) parts[0] = parts[0].slice(0, 3);
+      if (parts.length > 1 && parts[1].length > 2) parts[1] = parts[1].slice(0, 2);
+      return parts.join('.');
+    }
+
+    function getConfigForValue(value) {
+      const parts = value.split('.'), beforePoint = parts[0].length, afterPoint = parts.length > 1 ? parts[1].length : 0, hasDot = parts.length > 1;
+      if (hasDot && afterPoint === 0) {
+        if (beforePoint === 1) return soloPunto_1; if (beforePoint === 2) return soloPunto_2; if (beforePoint >= 3) return soloPunto_3;
+      }
+      if (hasDot && afterPoint > 0) {
+        const b = Math.min(beforePoint, 3), a = Math.min(afterPoint, 2);
+        if (b === 1 && a === 1) return conDecimal_1_1; if (b === 1 && a === 2) return conDecimal_1_2;
+        if (b === 2 && a === 1) return conDecimal_2_1; if (b === 2 && a === 2) return conDecimal_2_2;
+        if (b === 3 && a === 1) return conDecimal_3_1; if (b === 3 && a === 2) return conDecimal_3_2;
+      }
+      if (beforePoint === 0) return symbolConfigEnteros['0'];
+      if (beforePoint >= 6) return symbolConfigEnteros['6'];
+      return symbolConfigEnteros[String(beforePoint)] || symbolConfigEnteros['0'];
+    }
+
+    function applySymbolConfig(config) {
+      if (!config) return;
+      currencySymbolForm.style.transform = `translateX(${config.posX}%) translateY(${config.posY}px) scale(${config.scale})`;
+      currencySymbolForm.style.fontSize = config.fontSize + 'px';
+    }
+
+    function getFontSize(totalLength) {
+      if (totalLength <= 2) return '60px'; if (totalLength === 3) return '50px';
+      if (totalLength === 4) return '45px'; if (totalLength === 5) return '40px'; return '35px';
+    }
+
+    amountInputForm.addEventListener('input', function(e) {
+      let value = sanitizeInput(this.value);
+      if (value === '' || value === '.') {
+        this.placeholder = '0'; errorMessage.classList.remove('hidden');
+        applySymbolConfig(value === '.' ? soloPuntoConfig : symbolConfigEnteros['0']);
+        this.style.fontSize = '60px';
+      } else {
+        this.placeholder = '';
+        const numericValue = parseFloat(value.replace(/\./g, ''));
+        errorMessage.classList.toggle('hidden', numericValue > 0);
+        const config = getConfigForValue(value), cleanValue = value.replace(/\./g, '');
+        this.style.fontSize = getFontSize(cleanValue.length);
+        applySymbolConfig(config);
+      }
+      this.value = value;
+    });
+
+    amountInputForm.addEventListener('blur', function() {
+      if (this.value === '' || this.value === '0' || this.value === '.') {
+        this.placeholder = '0'; this.value = ''; errorMessage.classList.remove('hidden');
+        applySymbolConfig(symbolConfigEnteros['0']); this.style.fontSize = '60px';
+      }
+    });
+    amountInputForm.addEventListener('focus', function() { if (this.placeholder === '0' && this.value === '') this.value = ''; });
+
+    document.getElementById('phoneInput').addEventListener('input', function(e) { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3); });
+
+    // 🔴 VALIDACIÓN DEL FORMULARIO ANTES DE YAPEAR
+    document.getElementById('btnYapearForm').addEventListener('click', () => {
+      const name = document.getElementById('recipientName').value.trim();
+      const amount = document.getElementById('amountInputForm').value.trim();
+      const phone = document.getElementById('phoneInput').value.trim();
+      
+      // Validar campos
+      if (!name || !amount || !phone) {
+        let missingFields = [];
+        if (!name) missingFields.push('el nombre');
+        if (!amount) missingFields.push('el monto');
+        if (!phone) missingFields.push('los 3 números');
+        
+        let message = 'Debes llenar ';
+        if (missingFields.length === 1) {
+          message += missingFields[0] + ' ';
+        } else if (missingFields.length === 2) {
+          message += missingFields.join(' y ') + ' ';
+        } else {
+          message += missingFields.join(', ') + ' ';
+        }
+        
+        showErrorModal(message);
+        return;
+      }
+      
+      // 🔴 VALIDAR QUE EL TELÉFONO TENGA EXACTAMENTE 3 DÍGITOS
+      if (phone.length !== 3) {
+        showErrorModal('Debes ingresar exactamente 3 números para poder yapear.');
+        return;
+      }
+      
+      // Si todo está bien, generar comprobante
+      generateReceipt();
+      showScreen('receipt-screen');
+    });
+
+    // ========== MODAL DE ERROR ==========
+    function showErrorModal(message) {
+      document.getElementById('errorMessageText').textContent = message;
+      document.getElementById('errorModal').classList.add('active');
+    }
+    
+    function closeErrorModal() {
+      document.getElementById('errorModal').classList.remove('active');
+    }
+    
+    // Cerrar modal al hacer click fuera
+    document.getElementById('errorModal').addEventListener('click', function(e) {
+      if (e.target === this) closeErrorModal();
+    });
+
+    // ========== GENERACIÓN DE COMPROBANTE ==========
+    function generateReceipt() {
+      const name = document.getElementById('recipientName').value.trim();
+      const amount = document.getElementById('amountInputForm').value;
+      const phone = document.getElementById('phoneInput').value;
+      
+      const formattedAmount = `S/${amount}`;
+      const formattedPhone = `*** *** ${phone.padStart(3, '0')}`;
+      
+      const now = new Date();
+      const day = now.getDate();
+      const months = ['Ene.', 'Feb.', 'Mar.', 'Abr.', 'May.', 'Jun.', 'Jul.', 'Ago.', 'Sep.', 'Oct.', 'Nov.', 'Dic.'];
+      const month = months[now.getMonth()];
+      const year = now.getFullYear();
+      const formattedDate = `${day} ${month} ${year}`;
+      
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const formattedTime = `${hours}:${minutes} ${ampm}`;
+      
+      const rand1 = Math.floor(Math.random() * 10);
+      const rand2 = Math.floor(Math.random() * 10);
+      const rand3 = Math.floor(Math.random() * 10);
+      const operationCode = Array.from({length: 8}, () => Math.floor(Math.random() * 10)).join('');
+      
+      document.getElementById('receiptName').textContent = name;
+      document.getElementById('receiptAmount').textContent = formattedAmount;
+      document.getElementById('receiptPhone').textContent = formattedPhone;
+      document.getElementById('receiptDate').textContent = formattedDate;
+      document.getElementById('receiptTime').textContent = formattedTime;
+      document.getElementById('receiptRandom1').textContent = rand1;
+      document.getElementById('receiptRandom2').textContent = rand2;
+      document.getElementById('receiptRandom3').textContent = rand3;
+      document.getElementById('receiptOperation').textContent = operationCode;
+    }
+
+    // Navegación - Click en el comprobante para volver al inicio
+    document.getElementById('receipt-screen').addEventListener('click', () => {
+      // Resetear formulario
+      document.getElementById('recipientName').value = '';
+      document.getElementById('amountInputForm').value = '';
+      document.getElementById('phoneInput').value = '';
+      showScreen('main-screen');
+    });
+
+    document.getElementById('btnYapearMain').addEventListener('click', () => showScreen('form-screen'));
+    document.getElementById('btnBackForm').addEventListener('click', () => showScreen('main-screen'));
+
+    // Prevención de gestos
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('gesturechange', e => e.preventDefault());
+    document.addEventListener('gestureend', e => e.preventDefault());
+    document.addEventListener('scroll', () => window.scrollTo(0, window.scrollY));
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.activeElement === document.getElementById('recipientName')) { amountInputForm.focus(); }});
+
+    applySymbolConfig(symbolConfigEnteros['0']);
+  </script>
+</body>
+</html>
