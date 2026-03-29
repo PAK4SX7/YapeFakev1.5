@@ -114,7 +114,7 @@ if ('serviceWorker' in navigator) {
 
     /* Top Bar */
     .top-bar {
-      padding: calc(4px + env(safe-area-inset-top)) 12px 4px;  /* 🔴 REDUCIDO (era 8px) */
+      padding: calc(4px + env(safe-area-inset-top)) 12px 4px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -189,7 +189,7 @@ if ('serviceWorker' in navigator) {
 
     /* Grid */
     .grid-section {
-      padding: 6px 10px;  /* 🔴 REDUCIDO (era 10px) */
+      padding: 4px 10px;  /* 🔴 REDUCIDO (era 6px) */
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px 6px;
@@ -232,7 +232,7 @@ if ('serviceWorker' in navigator) {
 
     /* ========== CAROUSEL ========== */
     .carousel-section {
-      margin: 12px 10px 8px 8px;  /* 🔴 REDUCIDO (era 18px) */
+      margin: 8px 10px 8px 8px;  /* 🔴 REDUCIDO (era 12px) */
       background: transparent;
       border-radius: 12px;
       padding: 0;
@@ -287,8 +287,8 @@ if ('serviceWorker' in navigator) {
       margin-top: auto;
       border-top-left-radius: 32px;
       border-top-right-radius: 32px;
-      padding: 24px 12px calc(16px + env(safe-area-inset-bottom));
-      min-height: 220px;
+      padding: 18px 12px calc(16px + env(safe-area-inset-bottom));  /* 🔴 REDUCIDO (era 24px) */
+      min-height: 200px;  /* 🔴 REDUCIDO (era 220px) */
       width: 100%; 
       max-width: 430px;
       flex-shrink: 0;
@@ -1283,7 +1283,7 @@ if ('serviceWorker' in navigator) {
       
       // 🔴 VALIDAR QUE EL TELÉFONO TENGA EXACTAMENTE 3 DÍGITOS
       if (phone.length !== 3) {
-        showErrorModal('Debes ingresar exactamente 3 numeros');
+        showErrorModal('Debes ingresar exactamente 3 números.');
         return;
       }
       
