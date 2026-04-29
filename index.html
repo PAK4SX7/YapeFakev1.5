@@ -28,6 +28,20 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      /* 🔒 Bloquear selección de texto y menú contextual en todos los elementos */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none; /* Evita menú de iOS al mantener presionado */
+    }
+
+    /* Permitir selección solo en campos de entrada */
+    input, textarea {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
     }
 
     html, body {
@@ -45,6 +59,11 @@
       min-height: 100vh;
       min-height: 100dvh;
       background: #000;
+      /* Bloqueo adicional en body */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
 
     .screen {
@@ -88,6 +107,8 @@
       opacity: 0;
       transform: scale(0.3) translateY(50px);
       transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      -webkit-touch-callout: none;
+      pointer-events: none; /* Evita interacción con la imagen del splash */
     }
 
     #splash-screen.active img {
@@ -119,7 +140,7 @@
 
     /* Top Bar */
     .top-bar {
-      padding: calc(14px + env(safe-area-inset-top)) 12px 0px;  /* 🔽 Bajada la barra superior de 0px a 14px */
+      padding: calc(14px + env(safe-area-inset-top)) 12px 0px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -150,6 +171,7 @@
       height: 20px;
       fill: white; 
       opacity: 0.95; 
+      pointer-events: none; /* Evita menú contextual en íconos SVG */
     }
 
     /* Greeting */
@@ -180,6 +202,7 @@
       height: 24px;
       fill: white; 
       opacity: 0.9; 
+      pointer-events: none;
     }
     .greeting-text {
       color: white; 
@@ -193,7 +216,7 @@
 
     /* Grid */
     .grid-section {
-      padding: 24px 10px 6px 10px;  /* botones ya estaban bajados */
+      padding: 24px 10px 6px 10px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px 6px;
@@ -212,10 +235,12 @@
     }
     .tile img { 
       width: 40px; height: 40px;
-      object-fit: contain; 
+      object-fit: contain;
+      pointer-events: none; /* 🔒 Evita arrastrar/guardar imagen del grid */
     }
     .tile-large img { 
       width: 50px; height: 50px;
+      pointer-events: none;
     }
     .label {
       color: white; 
@@ -234,7 +259,7 @@
 
     /* ========== CAROUSEL ========== */
     .carousel-section {
-      margin: 36px 10px 8px 8px;  /* anuncios ya estaban bajados */
+      margin: 36px 10px 8px 8px;
       background: transparent;
       border-radius: 12px;
       padding: 0;
@@ -269,6 +294,7 @@
       object-fit: contain;
       border-radius: 10px;
       display: block;
+      pointer-events: none; /* 🔒 Evita interacción con imágenes del carrusel */
     }
     .carousel-dots {
       display: flex;
@@ -306,7 +332,7 @@
       font-size: 16px; color: #641974; font-weight: 500;
     }
     .balance-value { font-size: 18px; font-weight: 700; color: #1E192D; }
-    .transactions-icon { width: 24px; height: 24px; object-fit: contain; }
+    .transactions-icon { width: 24px; height: 24px; object-fit: contain; pointer-events: none; }
     .chevron { width: 22px; height: 22px; fill: #9E9E9E; }
 
     /* Action Buttons */
@@ -595,6 +621,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      pointer-events: none; /* 🔒 Evita interacción con la imagen del comprobante */
     }
     
     @keyframes receiptAppear {
@@ -804,7 +831,7 @@
 
   <!-- ============ PANTALLA 1: SPLASH ============ -->
   <div id="splash-screen" class="screen">
-    <img src="https://i.ibb.co/jkJPpxFY/Yape-iniciando.png" alt="Yape iniciando">
+    <img src="https://i.ibb.co/jkJPpxFY/Yape-iniciando.png" alt="Yape iniciando" draggable="false">
   </div>
 
   <!-- ============ PANTALLA 2: MENÚ PRINCIPAL ============ -->
@@ -825,30 +852,30 @@
 
       <!-- Grid Section -->
       <div class="grid-section">
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/pr9mvKQf/Icono-recargar-celular.png" alt="Recargar"></div><div class="label">Recargar<br>celular</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/MxtgCzXT/Icono-facil-rapido.png" alt="Servicios"></div><div class="label">Yapear<br>servicios</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/BVgywW7n/Icono-promos.png" alt="Promos"></div><div class="label">Promos</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/fYJWtyp2/Icono-aprobar-compras.png" alt="Compras"></div><div class="label">Aprobar<br>compras</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/RkVhgrmx/Icono-creditos.png" alt="Créditos"></div><div class="label">Créditos</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/KzqtXNd7/Icono-gaming.png" alt="Gaming"></div><div class="label">Gaming</div></div>
-        <div class="grid-item"><div class="tile" style="position:relative;"><span class="badge-ica">Ica</span><img src="https://i.ibb.co/2YK1rZyg/Icono-viajes.png" alt="Viajes"></div><div class="label">Viajar<br>en bus</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/wFgwMCr3/Icono-remesas.png" alt="Remesas"></div><div class="label">Remesas</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/35GKjgq9/Icono-soat.png" alt="SOAT"></div><div class="label">SOAT</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/7dHrqy6k/Icono-enviar-al-extrangero.png" alt="Exterior"></div><div class="label">Enviar al<br>exterior</div></div>
-        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/mrgCNPmJ/Icono-elecciones-generales.png" alt="Elecciones"></div><div class="label">Elecciones<br>Generales</div></div>
-        <div class="grid-item"><div class="tile tile-large" style="background:transparent;box-shadow:none;"><img src="https://i.ibb.co/fz9RzVrP/Icono-ver-mas.png" alt="Ver todo"></div><div class="label">Ver todo</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/pr9mvKQf/Icono-recargar-celular.png" alt="Recargar" draggable="false"></div><div class="label">Recargar<br>celular</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/MxtgCzXT/Icono-facil-rapido.png" alt="Servicios" draggable="false"></div><div class="label">Yapear<br>servicios</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/BVgywW7n/Icono-promos.png" alt="Promos" draggable="false"></div><div class="label">Promos</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/fYJWtyp2/Icono-aprobar-compras.png" alt="Compras" draggable="false"></div><div class="label">Aprobar<br>compras</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/RkVhgrmx/Icono-creditos.png" alt="Créditos" draggable="false"></div><div class="label">Créditos</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/KzqtXNd7/Icono-gaming.png" alt="Gaming" draggable="false"></div><div class="label">Gaming</div></div>
+        <div class="grid-item"><div class="tile" style="position:relative;"><span class="badge-ica">Ica</span><img src="https://i.ibb.co/2YK1rZyg/Icono-viajes.png" alt="Viajes" draggable="false"></div><div class="label">Viajar<br>en bus</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/wFgwMCr3/Icono-remesas.png" alt="Remesas" draggable="false"></div><div class="label">Remesas</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/35GKjgq9/Icono-soat.png" alt="SOAT" draggable="false"></div><div class="label">SOAT</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/7dHrqy6k/Icono-enviar-al-extrangero.png" alt="Exterior" draggable="false"></div><div class="label">Enviar al<br>exterior</div></div>
+        <div class="grid-item"><div class="tile"><img src="https://i.ibb.co/mrgCNPmJ/Icono-elecciones-generales.png" alt="Elecciones" draggable="false"></div><div class="label">Elecciones<br>Generales</div></div>
+        <div class="grid-item"><div class="tile tile-large" style="background:transparent;box-shadow:none;"><img src="https://i.ibb.co/fz9RzVrP/Icono-ver-mas.png" alt="Ver todo" draggable="false"></div><div class="label">Ver todo</div></div>
       </div>
 
       <!-- Carousel -->
       <div class="carousel-section">
         <div class="carousel-container">
           <div class="carousel-track" id="carouselTrack">
-            <div class="carousel-slide"><img src="https://i.ibb.co/kgjvQ6c5/Yape-anuncio1.png" alt="Ad 1"></div>
-            <div class="carousel-slide"><img src="https://i.ibb.co/HLD4VHRK/Yape-anuncio2.png" alt="Ad 2"></div>
-            <div class="carousel-slide"><img src="https://i.ibb.co/KcMJ3FKv/Yape-anuncio3.png" alt="Ad 3"></div>
-            <div class="carousel-slide"><img src="https://i.ibb.co/1tbDP3cD/Yape-anuncio4.png" alt="Ad 4"></div>
-            <div class="carousel-slide"><img src="https://i.ibb.co/rGfM0w4Y/Yape-anuncio5.png" alt="Ad 5"></div>
-            <div class="carousel-slide"><img src="https://i.ibb.co/LXKWw2bY/Yape-anuncio6.png" alt="Ad 6"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/kgjvQ6c5/Yape-anuncio1.png" alt="Ad 1" draggable="false"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/HLD4VHRK/Yape-anuncio2.png" alt="Ad 2" draggable="false"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/KcMJ3FKv/Yape-anuncio3.png" alt="Ad 3" draggable="false"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/1tbDP3cD/Yape-anuncio4.png" alt="Ad 4" draggable="false"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/rGfM0w4Y/Yape-anuncio5.png" alt="Ad 5" draggable="false"></div>
+            <div class="carousel-slide"><img src="https://i.ibb.co/LXKWw2bY/Yape-anuncio6.png" alt="Ad 6" draggable="false"></div>
           </div>
         </div>
         <div class="carousel-dots">
@@ -872,7 +899,7 @@
         </div>
         <div class="transactions-card">
           <div class="transactions-left">
-            <img class="transactions-icon" src="https://i.ibb.co/bjdR5CNH/Icono-ver-movimientos.png" alt="Movimientos">
+            <img class="transactions-icon" src="https://i.ibb.co/bjdR5CNH/Icono-ver-movimientos.png" alt="Movimientos" draggable="false">
             <span class="transactions-label">Mostrar movimientos</span>
           </div>
           <svg class="chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
@@ -973,7 +1000,7 @@
   <div id="receipt-screen" class="screen">
     <div class="receipt-container">
       <div class="receipt-image-wrapper">
-        <img src="https://i.ibb.co/MyK5kWJc/YAPE-BAUCHER-v3.png" alt="Comprobante Yape" class="receipt-image">
+        <img src="https://i.ibb.co/MyK5kWJc/YAPE-BAUCHER-v3.png" alt="Comprobante Yape" class="receipt-image" draggable="false">
         
         <span class="receipt-text receipt-name" id="receiptName">Nombre</span>
         <span class="receipt-text receipt-amount" id="receiptAmount">S/ 0</span>
@@ -1085,6 +1112,12 @@
     window.addEventListener('appinstalled', () => {
       installWrap.classList.add('hidden');
       deferredPrompt = null;
+    });
+
+    // 🔒 BLOQUEAR MENÚ CONTEXTUAL (click derecho / mantener presionado)
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
     });
 
     // ========== VARIABLES GLOBALES ==========
