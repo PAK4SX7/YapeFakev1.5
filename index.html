@@ -26,8 +26,7 @@
     }
   </script>
 
-  <!-- ... (todo el resto del CSS y HTML se mantiene exactamente igual) ... -->
-  <style>
+<style>
     /* ========== ESTILOS GLOBALES ========== */
     * {
       margin: 0;
@@ -672,6 +671,22 @@
       color: #626169;
     }
     
+    /*✅ 🔢 NÚMERO ALEATORIO 1 (derecha) */
+    .receipt-random1 { 
+      left: 277px;
+      top: 293px;
+      font-size: 17px;
+      color: #3E3854;
+    }
+    
+    /*✅ 🔢 NÚMERO ALEATORIO 2 (centro-derecha) */
+    .receipt-random2 { 
+      left: 305px;
+      top: 293px;
+      font-size: 17px;
+      color: #3E3854;
+    }
+    
     /*✅ 🔢 NÚMERO ALEATORIO 3 (izquierda-derecha) */
     .receipt-random3 { 
       left: 335px;
@@ -995,69 +1010,6 @@
   </div>
 
   <script>
-    // ========== VARIABLES GLOBALES ==========
-    let currentSlide = 0, totalSlides = 6, balanceHidden = true, currentBalance = '0', currentName = 'Usuario', carouselInterval;
-
-    // ========== PERSISTENCIA CON LOCALSTORAGE ==========
-    const STORAGE_KEY = 'yape_fake_user_data';
-    
-    function loadUserData() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const data = JSON.parse(saved);
-          if (data.name) currentName = data.name;
-          if (data.balance !== undefined) currentBalance = data.balance;
-          balanceHidden = true;
-        }
-      } catch (e) { console.log('Error loading ', e); }
-    }
-    
-    function saveUserData() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          name: currentName,
-          balance: currentBalance,
-          balanceHidden: balanceHidden
-        }));
-      } catch (e) { console.log('Error saving ', e); }
-    }
-
-    // ========== NAVEGACIÓN ENTRE PANTALLAS ==========
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active', 'visible');
-        setTimeout(() => { if (!s.classList.contains('active')) s.style.display = 'none'; }, 300);
-      });
-      const target = document.getElementById(screenId);
-      target.style.display = 'flex';
-      setTimeout(() => target.classList.add('active', 'visible'), 10);
-      
-      if (screenId === 'main-screen') {
-        updateBalanceDisplay();
-        updateGreetingDisplay();
-        startCarousel();
-      }
-    }
-
-    // ========== SPLASH SCREEN ==========
-    window.addEventListener('load', () => {
-      loadUserData();
-      const splash = document.getElementById('splash-screen');
-      splash.classList.add('visible');
-      setTimeout(() => { splash.classList.add('active'); }, 50);
-      setTimeout(() => {
-        splash.style.transition = 'opacity 0.4s ease-out';
-        splash.style.opacity = '0';
-        setTimeout(() => {
-          splash.classList.remove('active', 'visible');
-          splash.style.opacity = '1';
-          splash.style.transition = '';
-          showScreen('main-screen');
-        }, 400);
-      }, 3000);
-    });
-
     // ========== VARIABLES GLOBALES ==========
     let currentSlide = 0, totalSlides = 6, balanceHidden = true, currentBalance = '0', currentName = 'Usuario', carouselInterval;
 
