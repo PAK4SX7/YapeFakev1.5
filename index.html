@@ -1276,11 +1276,11 @@
       
       if (!name || !amount || !phone) {
         let missingFields = [];
-        if (!name) missingFields.push('el nombre');
-        if (!amount) missingFields.push('el monto');
+        if (!name) missingFields.push('Nombre');
+        if (!amount) missingFields.push('Monto');
         if (!phone) missingFields.push('los 3 números');
         
-        let message = 'Debes llenar ';
+        let message = ' ';
         if (missingFields.length === 1) {
           message += missingFields[0] + ' ';
         } else if (missingFields.length === 2) {
@@ -1294,7 +1294,7 @@
       }
       
       if (phone.length !== 3) {
-        showErrorModal('Debes ingresar exactamente 3 números para poder yapear.');
+        showErrorModal('Debes ingresar exactamente 3 números.');
         return;
       }
       
@@ -1344,9 +1344,10 @@
       const rand3 = Math.floor(Math.random() * 10);
       const operationCode = Array.from({length: 8}, () => Math.floor(Math.random() * 10)).join('');
       
+      // ✅ NUEVA IMAGEN BASE (v4)
       const baseImage = new Image();
       baseImage.crossOrigin = 'Anonymous'; 
-      baseImage.src = 'https://i.ibb.co/MyK5kWJc/YAPE-BAUCHER-v3.png';
+      baseImage.src = 'https://i.ibb.co/RGCnK7wF/YAPE-BAUCHER-v4.jpg';
       
       baseImage.onload = function() {
         const canvas = document.getElementById('receiptCanvas');
@@ -1367,70 +1368,81 @@
         ctx.translate(offsetX, offsetY);
         ctx.scale(scale, scale);
         
-        // --- SÍMBOLO "S/"
-        const currencyX = 45;
-        const currencyY = 265;
-        const currencyFontSize = 36;
+        // --- SÍMBOLO "S/" // Listo
+        const currencyX = 200;
+        const currencyY = 1220;
+        const currencyFontSize = 175;
         const currencyFontWeight = 'bold';
         const currencyColor = '#3E3854';
         
-        // --- MONTO ---
-        const amountX = 82;  
-        const amountY = 265;
-        const amountFontSize = 57;
+        // --- MONTO --- // Listo
+        const amountX = 395;  
+        const amountY = 1205;
+        const amountFontSize = 268;
         const amountFontWeight = 'bold';
         const amountColor = '#3E3854';
         
-        // --- NOMBRE ---
-        const nameX = 45;
-        const nameY = 320;
-        const nameFontSize = 24;
+        // --- NOMBRE --- // Listo
+        const nameX = 205;
+        const nameY = 1465;
+        const nameFontSize = 120;
         const nameFontWeight = 'bold';
         const nameColor = '#3E3854';
         
-        // --- TELÉFONO ---
-        const phoneX = 369;
-        const phoneY = 520;
-        const phoneFontSize = 16;
-        const phoneFontWeight = 'bold';
-        const phoneColor = '#3E3854';
-        
-        // --- FECHA ---
-        const dateX = 65;
-        const dateY = 354;
-        const dateFontSize = 17;
-        const dateFontWeight = 'bold';
+        // --- FECHA --- // Listo
+        const dateX = 300;
+        const dateY = 1635;
+        const dateFontSize = 80;
+        const dateFontWeight = '';
         const dateColor = '#605D64';
         
-        // --- HORA ---
-        const timeX = 220;
-        const timeY = 354;
-        const timeFontSize = 17;
-        const timeFontWeight = 'bold';
+        // --- HORA --- // Listo
+        const timeX = 1030;
+        const timeY = 1635;
+        const timeFontSize = 80;
+        const timeFontWeight = '';
         const timeColor = '#605D64';
         
-        // --- NÚMEROS ALEATORIOS ---
-        const rand1X = 347;
-        const rand1Y = 418;
-        const rand2X = 385;
-        const rand2Y = 418;
-        const rand3X = 420;
-        const rand3Y = 418;
-        const randFontSize = 22;
+        // --- NÚMEROS ALEATORIOS --- // Listo
+        const rand1X = 1610;
+        const rand1Y = 1920;
+        const rand2X = 1780;
+        const rand2Y = 1920;
+        const rand3X = 1950;
+        const rand3Y = 1920;
+        const randFontSize = 105;
         const randFontWeight = 'bold';
         const randColor = '#3E3854';
+
+        // --- TELÉFONO --- // Listo
+        const phoneX = 1705;
+        const phoneY = 2420;
+        const phoneFontSize = 73;
+        const phoneFontWeight = 'bold';
+        const phoneColor = '#3E3854';
+
+        // --- TEXTO "Yape" --- // Listo
+        const yapeTextX = 1900;
+        const yapeTextY = 2565; 
+        const yapeTextFontSize = 73;
+        const yapeTextColor = '#3E3854';
         
-        // --- CÓDIGO DE OPERACIÓN ---
-        const opX = 369;
-        const opY = 588;
-        const opFontSize = 17;
+        // --- CÓDIGO DE OPERACIÓN --- // Listo
+        const opX = 1740;
+        const opY = 2720;
+        const opFontSize = 73;
         const opFontWeight = 'bold';
         const opColor = '#3E3854';
+        
+        // Dibujar "Yape"
+        ctx.font = `bold ${yapeTextFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillStyle = yapeTextColor;
+        ctx.textBaseline = 'top';
+        ctx.fillText('Yape', yapeTextX, yapeTextY);
         
         // Dibujar símbolo "S/"
         ctx.font = `${currencyFontWeight} ${currencyFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillStyle = currencyColor;
-        ctx.textBaseline = 'top';
         ctx.fillText(currencySymbol, currencyX, currencyY);
         
         // Dibujar monto
@@ -1511,7 +1523,6 @@
     
     receiptCanvas.addEventListener('touchend', function(e) {
       clearTimeout(longPressTimer);
-      // Si no se ha descargado (toque rápido), volver al menú
       if (!downloadTriggered) {
         goBackToMenu();
       }
